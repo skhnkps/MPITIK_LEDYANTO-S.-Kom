@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPI TIK SLB - SKH Negeri 1 Kuala Kapuas</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Fredoka for SLB friendly typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            background-color: #f0fdf4;
+            background-image: url('assets/bg.png'), 
+                              radial-gradient(circle at 15% 15%, rgba(253, 224, 71, 0.35) 0%, transparent 35%), 
+                              radial-gradient(circle at 85% 85%, rgba(52, 211, 153, 0.35) 0%, transparent 35%), 
+                              radial-gradient(circle at 50% 50%, rgba(186, 230, 253, 0.4) 0%, transparent 50%),
+                              linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+            background-size: cover, auto, auto, auto, cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            user-select: none;
+        }
+        .btn-bounce {
+            transition: transform 0.15s ease-in-out;
+        }
+        .btn-bounce:hover {
+            transform: scale(1.04);
+        }
+        .btn-bounce:active {
+            transform: scale(0.96);
+        }
+        .pulse-slow {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.88; transform: scale(1.03); }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between antialiased selection:bg-yellow-300">
+
+    <header class="bg-teal-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
+                <div class="bg-yellow-400 p-2.5 rounded-2xl text-teal-900 shadow-md">
+                    <i class="fa-solid fa-laptop-code text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold leading-tight tracking-wide">BELAJAR TIK CERIA</h1>
+                    <p class="text-xs text-teal-100 font-sans">SKH Negeri 1 Kuala Kapuas</p>
+                </div>
+            </div>
+
+            <!-- Global Controls & Navigation -->
+            <div class="flex items-center gap-2 bg-teal-700 p-1.5 rounded-2xl">
+                <!-- Badge Nama Siswa -->
+                <div id="student-badge" onclick="openStudentModal()" class="flex items-center gap-2 bg-teal-800 hover:bg-teal-900 text-yellow-300 px-3 py-1.5 rounded-xl text-sm font-bold border border-teal-600 cursor-pointer transition" title="Klik untuk ubah nama">
+                    <i class="fa-solid fa-user-graduate text-yellow-400"></i>
+                    <span id="display-student-name">Siswa</span>
+                    <i class="fa-solid fa-pen-to-square text-xs opacity-75 ml-0.5"></i>
+                </div>
+
+                <!-- Tombol Predikat Siswa -->
+                <button onclick="switchTab('predikat')" class="bg-amber-400 hover:bg-amber-300 text-teal-950 font-bold px-3 py-1.5 rounded-xl text-sm flex items-center gap-1.5 transition shadow" title="Predikat & Hasil Belajar">
+                    <i class="fa-solid fa-award text-base text-amber-900"></i>
+                    <span class="hidden md:inline">Predikat</span>
+                </button>
+
+                <!-- Tombol Fullscreen -->
+                <button onclick="toggleFullscreen()" id="btn-fullscreen" class="bg-teal-800 hover:bg-teal-900 text-white font-bold px-3 py-1.5 rounded-xl text-sm flex items-center gap-1.5 transition border border-teal-600" title="Layar Penuh">
+                    <i class="fa-solid fa-expand text-base" id="icon-fullscreen"></i>
+                    <span class="hidden lg:inline" id="text-fullscreen">Layar Penuh</span>
+                </button>
+
+                <button onclick="document.getElementById('bg-file-input').click()" class="bg-teal-800 hover:bg-teal-900 text-yellow-300 font-bold px-3 py-1.5 rounded-xl text-sm flex items-center gap-1.5 transition border border-teal-600" title="Ganti Latar Belakang (Upload)">
+                    <i class="fa-solid fa-image text-base"></i>
+                    <span class="hidden xl:inline">Ganti BG</span>
+                </button>
+                <input type="file" id="bg-file-input" accept="image/*" class="hidden" onchange="handleBgUpload(event)">
+
+                <!-- Tombol Audio Narasi -->
+                <button onclick="toggleAudioNarration()" id="btn-audio-toggle" class="bg-yellow-400 hover:bg-yellow-300 text-teal-950 font-bold px-3 py-1.5 rounded-xl text-sm flex items-center gap-1.5 transition shadow">
+                    <i class="fa-solid fa-volume-high text-base" id="icon-audio"></i>
+                    <span id="text-audio" class="hidden sm:inline">Suara: ON</span>
+                </button>
+
+                <!-- Tombol Beranda -->
+                <button onclick="switchTab('home')" class="bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1.5 rounded-xl text-sm flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-house"></i>
+                    <span class="hidden sm:inline">Beranda</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="student-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border-4 border-teal-500 p-6 md:p-8 max-w-lg w-full shadow-2xl text-center space-y-6">
+            <div class="w-20 h-20 mx-auto bg-yellow-400 text-teal-900 rounded-full flex items-center justify-center text-4xl shadow-lg animate-bounce">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
+            
+            <div class="space-y-2">
+                <span class="bg-teal-100 text-teal-800 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider">SKH Negeri 1 Kuala Kapuas</span>
+                <h2 class="text-3xl font-extrabold text-teal-900">Selamat Datang!</h2>
+                <p class="text-slate-600 font-sans text-sm">Silakan masukkan nama kamu sebelum mulai belajar TIK ya!</p>
+            </div>
+
+            <div class="space-y-2 text-left">
+                <label for="input-student-name" class="block font-bold text-teal-800 text-sm">Nama Lengkap / Panggilan Siswa:</label>
+                <input type="text" id="input-student-name" placeholder="Contoh: Budi / Siti..." 
+                    class="w-full text-center text-2xl font-bold p-4 border-4 border-teal-300 rounded-2xl focus:border-yellow-400 focus:outline-none text-slate-800 placeholder-slate-300 shadow-inner">
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="startLearningWithStudent()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xl py-4 rounded-2xl shadow-xl btn-bounce transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-play text-yellow-300 text-2xl"></i> Mulai Belajar Sekarang!
+                </button>
+                <button onclick="speakText('Silakan ketik nama kamu di dalam kotak, lalu tekan tombol hijau Mulai Belajar!')" class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-volume-high text-base text-amber-600"></i> Dengarkan Petunjuk 🔊
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- VIEW 1: Home Dashboard -->
+        <section id="view-home" class="space-y-6">
+            <!-- Developer Info Header Banner -->
+            <div class="bg-gradient-to-r from-teal-500 to-emerald-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-20 text-white">
+                    <i class="fa-solid fa-shapes text-9xl"></i>
+                </div>
+                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="space-y-2 text-center md:text-left">
+                        <span class="bg-yellow-400 text-teal-950 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                            Media Pembelajaran Interaktif (MPI)
+                        </span>
+                        <h2 id="greeting-student-title" class="text-3xl md:text-4xl font-extrabold tracking-wide">Mengenal Komputer & TIK</h2>
+                        <p class="text-teal-100 text-base max-w-xl font-sans">
+                            Aplikasi pembelajaran khusus untuk membimbing putra-putri SLB belajar perangkat teknologi dengan cara yang mudah, seru, dan menyenangkan!
+                        </p>
+                    </div>
+
+                    <!-- Developer Profile Badge -->
+                    <div class="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl flex items-center gap-3 min-w-[250px]">
+                        <div class="w-14 h-14 rounded-full border-2 border-yellow-300 overflow-hidden shrink-0 bg-teal-700 flex items-center justify-center shadow">
+                            <img src="assets/aku.png" alt="Ledyanto, S.Kom" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                            <i class="fa-solid fa-user-gear text-2xl text-yellow-300 hidden"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs uppercase text-teal-200 tracking-wider font-semibold">Pengembang Application</p>
+                            <p class="text-lg font-bold text-yellow-300 mt-0.5">Ledyanto, S.Kom</p>
+                            <p class="text-xs text-white/90 mt-0.5"><i class="fa-solid fa-school mr-1"></i> SKH Negeri 1 Kuala Kapuas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Module Navigation Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Modul 1: Mengenal Alat -->
+                <div onclick="switchTab('hardware')" class="bg-white rounded-3xl border-4 border-blue-400 p-6 shadow-xl hover:shadow-2xl transition cursor-pointer btn-bounce flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="w-16 h-16 rounded-2xl bg-blue-500 text-white flex items-center justify-center text-3xl shadow-md">
+                            <i class="fa-solid fa-laptop"></i>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-blue-900">1. Mengenal Alat TIK</h3>
+                        <p class="text-slate-600 font-sans text-sm">Lihat bentuk perangkat komputer, laptop, mouse, printer, dan dengarkan penjelasannya.</p>
+                    </div>
+                    <div class="bg-blue-50 text-blue-700 font-bold px-4 py-2 rounded-xl text-sm flex items-center justify-between">
+                        <span>Buka Materi</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Modul 2: Kuis Jodohkan -->
+                <div onclick="switchTab('jodohkan')" class="bg-white rounded-3xl border-4 border-purple-400 p-6 shadow-xl hover:shadow-2xl transition cursor-pointer btn-bounce flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="w-16 h-16 rounded-2xl bg-purple-500 text-white flex items-center justify-center text-3xl shadow-md">
+                            <i class="fa-solid fa-puzzle-piece"></i>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-purple-900">2. Kuis TIK Interaktif</h3>
+                        <p class="text-slate-600 font-sans text-sm">Selesaikan 10 soal di setiap level (Level 1, 2, dan 3) untuk mengumpulkan nilai bintang.</p>
+                    </div>
+                    <div class="bg-purple-50 text-purple-700 font-bold px-4 py-2 rounded-xl text-sm flex items-center justify-between">
+                        <span>Mulai Kuis</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Modul 3: Belajar Ketik -->
+                <div onclick="switchTab('keyboard')" class="bg-white rounded-3xl border-4 border-emerald-400 p-6 shadow-xl hover:shadow-2xl transition cursor-pointer btn-bounce flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="w-16 h-16 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-3xl shadow-md">
+                            <i class="fa-solid fa-keyboard"></i>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-emerald-900">3. Belajar Keyboard</h3>
+                        <p class="text-slate-600 font-sans text-sm">Tekan tombol huruf dan angka pada layar untuk mendengarkan lafal suaranya.</p>
+                    </div>
+                    <div class="bg-emerald-50 text-emerald-700 font-bold px-4 py-2 rounded-xl text-sm flex items-center justify-between">
+                        <span>Latihan Ketik</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Modul 4: Game Tangkap -->
+                <div onclick="switchTab('game')" class="bg-white rounded-3xl border-4 border-rose-400 p-6 shadow-xl hover:shadow-2xl transition cursor-pointer btn-bounce flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="w-16 h-16 rounded-2xl bg-rose-500 text-white flex items-center justify-center text-3xl shadow-md">
+                            <i class="fa-solid fa-gamepad"></i>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-rose-900">4. Mini Game Tangkap TIK</h3>
+                        <p class="text-slate-600 font-sans text-sm">Game seru melatih motorik dan kecepatan menangkap ikon perangkat TIK.</p>
+                    </div>
+                    <div class="bg-rose-50 text-rose-700 font-bold px-4 py-2 rounded-xl text-sm flex items-center justify-between">
+                        <span>Mulai Game</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Modul 5: Predikat & Sertifikat -->
+                <div onclick="switchTab('predikat')" class="bg-white rounded-3xl border-4 border-amber-400 p-6 shadow-xl hover:shadow-2xl transition cursor-pointer btn-bounce flex flex-col justify-between space-y-4 sm:col-span-2 lg:col-span-2">
+                    <div class="flex flex-col sm:flex-row items-center gap-4">
+                        <div class="w-20 h-20 rounded-2xl bg-amber-400 text-teal-950 flex items-center justify-center text-4xl shadow-md shrink-0">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <div class="space-y-1 text-center sm:text-left">
+                            <h3 class="text-2xl font-extrabold text-amber-900">5. Predikat & Sertifikat Capaian Siswa</h3>
+                            <p class="text-slate-600 font-sans text-sm">Lihat total bintang, nilai predikat belajar TIK, dan cetak sertifikat kelulusan modul anak.</p>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 text-amber-800 font-bold px-4 py-2.5 rounded-xl text-sm flex items-center justify-between border border-amber-200">
+                        <span>Lihat Hasil & Predikat Belajar</span>
+                        <i class="fa-solid fa-award text-lg text-amber-600"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: Hardware Cards -->
+        <section id="view-hardware" class="hidden space-y-6">
+            <div class="flex items-center justify-between border-b-2 border-slate-200 pb-4">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-blue-900"><i class="fa-solid fa-laptop text-blue-600 mr-2"></i> Modul 1: Mengenal Alat TIK</h2>
+                    <p class="text-slate-600 font-sans text-sm">Sentuh atau klik kartu untuk mendengarkan nama dan penjelasan fungsi alat!</p>
+                </div>
+                <button onclick="switchTab('home')" class="bg-slate-200 hover:bg-slate-300 font-bold px-4 py-2 rounded-xl text-slate-700 transition">
+                    <i class="fa-solid fa-house mr-1"></i> Beranda
+                </button>
+            </div>
+
+            <!-- Hardware List Container Grid -->
+            <div id="hardware-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Injected dynamically via JS -->
+            </div>
+        </section>
+
+        <!-- VIEW 3: Kuis TIK Interaktif (Level 1, Level 2, Level 3) -->
+        <section id="view-jodohkan" class="hidden space-y-6">
+            <div class="flex flex-wrap items-center justify-between border-b-2 border-slate-200 pb-4 gap-2">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-purple-900"><i class="fa-solid fa-puzzle-piece text-purple-600 mr-2"></i> Modul 2: Kuis TIK Interaktif</h2>
+                    <p class="text-slate-600 font-sans text-sm">Pilih level, selesaikan 10 soal, dan dapatkan predikat bintang kamu!</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="quiz-score-badge" class="bg-purple-100 border border-purple-300 text-purple-900 font-bold px-4 py-2 rounded-xl flex items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-star text-yellow-500"></i> Akumulasi Skor: <span id="quiz-score">0</span>
+                    </span>
+                    <button onclick="switchTab('home')" class="bg-slate-200 hover:bg-slate-300 font-bold px-4 py-2 rounded-xl text-slate-700 transition">
+                        <i class="fa-solid fa-house"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Level Selector Tabs -->
+            <div class="bg-purple-50 p-3 rounded-2xl border-2 border-purple-200 flex flex-wrap justify-center gap-2 md:gap-4">
+                <button onclick="selectQuizLevel(1)" id="btn-level-1" class="level-tab-btn bg-purple-600 text-white font-bold px-4 py-2 rounded-xl shadow transition flex items-center gap-2 text-sm md:text-base">
+                    <i class="fa-solid fa-seedling"></i> Level 1: Gambar Alat
+                </button>
+                <button onclick="selectQuizLevel(2)" id="btn-level-2" class="level-tab-btn bg-white text-purple-900 hover:bg-purple-100 font-bold px-4 py-2 rounded-xl border border-purple-300 transition flex items-center gap-2 text-sm md:text-base">
+                    <i class="fa-solid fa-gears"></i> Level 2: Fungsi Alat
+                </button>
+                <button onclick="selectQuizLevel(3)" id="btn-level-3" class="level-tab-btn bg-white text-purple-900 hover:bg-purple-100 font-bold px-4 py-2 rounded-xl border border-purple-300 transition flex items-center gap-2 text-sm md:text-base">
+                    <i class="fa-solid fa-trophy"></i> Level 3: Tantangan TIK
+                </button>
+            </div>
+
+            <!-- Quiz Main Box -->
+            <div class="max-w-2xl mx-auto bg-white rounded-3xl border-4 border-purple-300 p-6 md:p-8 shadow-xl text-center space-y-6 relative">
+                <!-- Question Progress Indicator -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-sm font-bold text-purple-900">
+                        <span id="quiz-level-title" class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full border border-purple-300">Level 1: Mengenal Gambar</span>
+                        <span id="quiz-progress-text" class="text-purple-700 font-black text-base">Soal 1 / 10</span>
+                    </div>
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
+                        <div id="quiz-progress-bar" class="bg-gradient-to-r from-purple-500 to-indigo-500 h-full transition-all duration-300 w-[10%]"></div>
+                    </div>
+                </div>
+
+                <!-- Question Icon & Text -->
+                <div class="space-y-3 pt-2">
+                    <button onclick="readCurrentQuiz()" class="inline-flex items-center gap-2 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-4 py-2 rounded-full text-sm transition btn-bounce shadow-sm">
+                        <i class="fa-solid fa-volume-high text-lg text-amber-600"></i> Dengarkan Soal 🔊
+                    </button>
+                    
+                    <div id="quiz-image-box" class="w-44 h-44 mx-auto bg-slate-100 rounded-3xl border-2 border-dashed border-purple-400 flex items-center justify-center text-7xl text-purple-600 shadow-inner transition-all overflow-hidden p-2 relative">
+                        <img id="quiz-img" class="w-full h-full object-contain rounded-2xl hidden" alt="Gambar Soal TIK" onload="handleQuizImgSuccess(this)" onerror="handleQuizImgError(this)">
+                        <i id="quiz-icon" class="fa-solid fa-laptop"></i>
+                    </div>
+
+                    <h3 id="quiz-question-text" class="text-xl md:text-2xl font-extrabold text-slate-800 leading-snug">
+                        Manakah nama alat TIK pada gambar di atas?
+                    </h3>
+                </div>
+
+                <!-- Choice Options Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5" id="quiz-options-container">
+                    <!-- Injected via JS -->
+                </div>
+
+                <!-- Feedback Banner -->
+                <div id="quiz-feedback" class="hidden p-4 rounded-2xl font-bold text-lg"></div>
+            </div>
+
+            <!-- Quiz Result Modal (Triggered after 10 questions) -->
+            <div id="quiz-result-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+                <div class="bg-white rounded-3xl border-8 border-yellow-400 p-6 md:p-8 max-w-lg w-full shadow-2xl text-center space-y-6 relative overflow-hidden">
+                    <div class="w-24 h-24 mx-auto bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-5xl shadow-inner border-4 border-yellow-300">
+                        <i id="result-icon" class="fa-solid fa-award"></i>
+                    </div>
+
+                    <div class="space-y-2">
+                        <span id="result-level-badge" class="bg-purple-100 text-purple-900 font-extrabold px-4 py-1 rounded-full text-xs uppercase tracking-wider">
+                            SELESAI LEVEL 1
+                        </span>
+                        <h2 class="text-3xl font-extrabold text-slate-800">HASIL KUIS KAMU!</h2>
+                        <p id="result-student-name" class="text-teal-700 font-bold text-lg">Siswa SKH Negeri 1</p>
+                    </div>
+
+                    <!-- Stars Display -->
+                    <div id="result-stars-container" class="flex justify-center text-4xl text-amber-400 gap-2">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+
+                    <!-- Score Box -->
+                    <div class="bg-purple-50 border-2 border-purple-200 p-4 rounded-2xl space-y-1">
+                        <p class="text-xs text-purple-700 uppercase font-bold tracking-wider">Nilai Akhir Level Ini:</p>
+                        <p class="text-4xl font-black text-purple-900"><span id="result-score-val">100</span> / 100</p>
+                        <p id="result-predicate-badge" class="inline-block bg-yellow-400 text-teal-950 font-extrabold px-4 py-1 rounded-xl text-sm shadow mt-1">
+                            PREDIKAT: ISTIMEWA 🏆
+                        </p>
+                    </div>
+
+                    <p id="result-description" class="text-sm font-sans text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        Hebat sekali! Kamu berhasil menjawab semua soal dengan benar.
+                    </p>
+
+                    <!-- Modal Actions -->
+                    <div class="flex flex-col gap-2.5 pt-2">
+                        <button onclick="readQuizResultVoice()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-volume-high text-amber-600"></i> Dengarkan Hasil 🔊
+                        </button>
+                        <button onclick="nextQuizLevelOrRepeat()" id="btn-next-level" class="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-lg py-3 rounded-xl shadow-lg btn-bounce flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-circle-arrow-right"></i> Lanjut Level Berikutnya
+                        </button>
+                        <button onclick="closeResultModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl text-sm">
+                            Kembali ke Menu Kuis
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: Belajar Ketik Keyboard -->
+        <section id="view-keyboard" class="hidden space-y-6">
+            <div class="flex items-center justify-between border-b-2 border-slate-200 pb-4">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-emerald-900"><i class="fa-solid fa-keyboard text-emerald-600 mr-2"></i> Modul 3: Belajar Ketik Keyboard</h2>
+                    <p class="text-slate-600 font-sans text-sm">Tekan tombol pada layar atau papan ketik fisik kamu untuk mendengar suaranya!</p>
+                </div>
+                <button onclick="switchTab('home')" class="bg-slate-200 hover:bg-slate-300 font-bold px-4 py-2 rounded-xl text-slate-700 transition">
+                    <i class="fa-solid fa-house mr-1"></i> Beranda
+                </button>
+            </div>
+
+            <!-- Typing Display -->
+            <div class="bg-white rounded-3xl border-4 border-emerald-400 p-6 shadow-xl space-y-4">
+                <div class="flex justify-between items-center">
+                    <label class="text-sm font-bold text-emerald-800 uppercase tracking-wider">Layar Teks Hasil Ketik:</label>
+                    <button onclick="clearTypingDisplay()" class="text-xs bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1 rounded-lg font-bold">
+                        <i class="fa-solid fa-trash mr-1"></i> Hapus Semua
+                    </button>
+                </div>
+                <div id="typing-display" class="w-full min-h-[90px] bg-emerald-50 rounded-2xl border-2 border-emerald-200 p-4 text-3xl md:text-4xl font-mono font-bold text-emerald-900 tracking-widest break-words flex items-center">
+                    <span class="text-slate-400 font-sans text-lg font-normal">Tekan tombol huruf / angka di bawah...</span>
+                </div>
+            </div>
+
+            <!-- On-Screen Virtual Keyboard -->
+            <div class="bg-slate-800 p-4 sm:p-6 rounded-3xl shadow-2xl space-y-3 max-w-4xl mx-auto">
+                <!-- Numbers Row -->
+                <div class="grid grid-cols-10 gap-1.5 sm:gap-2">
+                    <button onclick="typeChar('1')" class="key-btn bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">1</button>
+                    <button onclick="typeChar('2')" class="key-btn bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">2</button>
+                    <button onclick="typeChar('3')" class="key-btn bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">3</button>
+                    <button onclick="typeChar('4')" class="key-btn bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">4</button>
+                    <button onclick="typeChar('5')" class="key-btn bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">5</button>
+                    <button onclick="typeChar('6')" class="key-btn bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">6</button>
+                    <button onclick="typeChar('7')" class="key-btn bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">7</button>
+                    <button onclick="typeChar('8')" class="key-btn bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">8</button>
+                    <button onclick="typeChar('9')" class="key-btn bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">9</button>
+                    <button onclick="typeChar('0')" class="key-btn bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">0</button>
+                </div>
+
+                <!-- QWERTY Row 1 -->
+                <div class="grid grid-cols-10 gap-1.5 sm:gap-2">
+                    <button onclick="typeChar('Q')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">Q</button>
+                    <button onclick="typeChar('W')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">W</button>
+                    <button onclick="typeChar('E')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">E</button>
+                    <button onclick="typeChar('R')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">R</button>
+                    <button onclick="typeChar('T')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">T</button>
+                    <button onclick="typeChar('Y')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">Y</button>
+                    <button onclick="typeChar('U')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">U</button>
+                    <button onclick="typeChar('I')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">I</button>
+                    <button onclick="typeChar('O')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">O</button>
+                    <button onclick="typeChar('P')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">P</button>
+                </div>
+
+                <!-- QWERTY Row 2 -->
+                <div class="grid grid-cols-9 gap-1.5 sm:gap-2 px-2">
+                    <button onclick="typeChar('A')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">A</button>
+                    <button onclick="typeChar('S')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">S</button>
+                    <button onclick="typeChar('D')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">D</button>
+                    <button onclick="typeChar('F')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">F</button>
+                    <button onclick="typeChar('G')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">G</button>
+                    <button onclick="typeChar('H')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">H</button>
+                    <button onclick="typeChar('J')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">J</button>
+                    <button onclick="typeChar('K')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">K</button>
+                    <button onclick="typeChar('L')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">L</button>
+                </div>
+
+                <!-- QWERTY Row 3 -->
+                <div class="grid grid-cols-7 gap-1.5 sm:gap-2 px-6">
+                    <button onclick="typeChar('Z')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">Z</button>
+                    <button onclick="typeChar('X')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">X</button>
+                    <button onclick="typeChar('C')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">C</button>
+                    <button onclick="typeChar('V')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">V</button>
+                    <button onclick="typeChar('B')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">B</button>
+                    <button onclick="typeChar('N')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">N</button>
+                    <button onclick="typeChar('M')" class="key-btn bg-slate-600 hover:bg-slate-500 text-white font-bold text-lg sm:text-2xl p-2 sm:p-3 rounded-xl shadow-md btn-bounce">M</button>
+                </div>
+
+                <!-- Space & Action Bar -->
+                <div class="flex gap-2 pt-2">
+                    <button onclick="typeChar(' ')" class="flex-grow bg-slate-500 hover:bg-slate-400 text-white font-bold py-3 rounded-xl shadow-md btn-bounce">
+                        SPASI
+                    </button>
+                    <button onclick="backspaceDisplay()" class="bg-amber-500 hover:bg-amber-400 text-white font-bold px-6 py-3 rounded-xl shadow-md btn-bounce flex items-center gap-2">
+                        <i class="fa-solid fa-backspace text-xl"></i> HAPUS
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 5: Mini Game Tangkap TIK -->
+        <section id="view-game" class="hidden space-y-6">
+            <div class="flex items-center justify-between border-b-2 border-slate-200 pb-4">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-rose-900"><i class="fa-solid fa-gamepad text-rose-600 mr-2"></i> Modul 4: Mini Game Tangkap TIK</h2>
+                    <p class="text-slate-600 font-sans text-sm">Klik atau sentuh ikon TIK yang bermunculan di area permainan!</p>
+                </div>
+                <button onclick="switchTab('home')" class="bg-slate-200 hover:bg-slate-300 font-bold px-4 py-2 rounded-xl text-slate-700 transition">
+                    <i class="fa-solid fa-house mr-1"></i> Beranda
+                </button>
+            </div>
+
+            <!-- Game Arena Panel -->
+            <div class="bg-white rounded-3xl border-4 border-rose-400 p-4 sm:p-6 shadow-xl space-y-4">
+                <div class="flex flex-wrap justify-between items-center bg-rose-50 p-4 rounded-2xl gap-2">
+                    <div class="flex items-center gap-6">
+                        <div class="text-lg font-bold text-rose-900">
+                            Waktu: <span id="game-timer" class="text-2xl text-rose-600 font-black">30</span>d
+                        </div>
+                        <div class="text-lg font-bold text-rose-900">
+                            Skor Game: <span id="game-score" class="text-2xl text-yellow-600 font-black">0</span>
+                        </div>
+                    </div>
+                    <button id="btn-start-game" onclick="startGame()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-6 py-2.5 rounded-2xl text-lg shadow-lg btn-bounce">
+                        <i class="fa-solid fa-play mr-2"></i> Mulai Bermain!
+                    </button>
+                </div>
+
+                <!-- Interactive Game Arena -->
+                <div id="game-arena" class="relative w-full h-[360px] bg-gradient-to-b from-sky-100 to-indigo-50 rounded-2xl border-2 border-indigo-200 overflow-hidden flex items-center justify-center">
+                    <div id="game-welcome-text" class="text-center p-6 space-y-2">
+                        <i class="fa-solid fa-hand-pointer text-6xl text-rose-400 animate-bounce"></i>
+                        <h3 class="text-2xl font-bold text-slate-700">Siap untuk Tangkap Gambar TIK?</h3>
+                        <p class="text-slate-500 max-w-md mx-auto">Klik tombol "Mulai Bermain" di atas, lalu sentuh ikon TIK secepat mungkin untuk mengumpulkan skor!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 6: Menu Predikat & Prestasi Siswa -->
+        <section id="view-predikat" class="hidden space-y-6">
+            <div class="flex items-center justify-between border-b-2 border-slate-200 pb-4">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-amber-900"><i class="fa-solid fa-trophy text-amber-500 mr-2"></i> Modul 5: Predikat & Hasil Belajar Siswa</h2>
+                    <p class="text-slate-600 font-sans text-sm">Laporan pencapaian bintang dan predikat belajar TIK anak.</p>
+                </div>
+                <button onclick="switchTab('home')" class="bg-slate-200 hover:bg-slate-300 font-bold px-4 py-2 rounded-xl text-slate-700 transition">
+                    <i class="fa-solid fa-house mr-1"></i> Beranda
+                </button>
+            </div>
+
+            <!-- Certificate Card Box -->
+            <div id="certificate-card" class="bg-white rounded-3xl border-8 border-amber-300 p-6 md:p-10 shadow-2xl space-y-6 text-center relative overflow-hidden">
+                <!-- Decorative Icons -->
+                <div class="absolute -top-10 -left-10 text-amber-100 opacity-50 pointer-events-none">
+                    <i class="fa-solid fa-award text-9xl"></i>
+                </div>
+                <div class="absolute -bottom-10 -right-10 text-amber-100 opacity-50 pointer-events-none">
+                    <i class="fa-solid fa-star text-9xl"></i>
+                </div>
+
+                <!-- Header Banner -->
+                <div class="space-y-2 relative z-10">
+                    <div class="inline-block bg-amber-100 text-amber-900 border-2 border-amber-300 font-extrabold px-6 py-1.5 rounded-full text-xs uppercase tracking-widest">
+                        SKH NEGERI 1 KUALA KAPUAS
+                    </div>
+                    <h3 class="text-3xl md:text-4xl font-extrabold text-teal-900">SERTIFIKAT CAPAIAN TIK</h3>
+                    <p class="text-slate-500 font-sans text-sm">Media Pembelajaran Interaktif TIK Pembelajaran Khusus (SLB)</p>
+                </div>
+
+                <!-- Student Profile Badge -->
+                <div class="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-teal-950 p-6 rounded-3xl shadow-lg space-y-2 max-w-xl mx-auto border-2 border-yellow-300 relative z-10">
+                    <p class="text-xs uppercase font-bold tracking-widest text-teal-900 opacity-80">Diberikan Kepada Siswa Hebat:</p>
+                    <h4 id="predikat-student-name" class="text-3xl md:text-4xl font-black text-slate-900 drop-shadow">Siswa Ceria</h4>
+                    <div id="predikat-badge-title" class="inline-flex items-center gap-2 bg-white text-amber-900 font-black px-5 py-2 rounded-2xl text-lg md:text-xl shadow">
+                        <i class="fa-solid fa-crown text-yellow-500"></i> Bintang TIK Ceria
+                    </div>
+                </div>
+
+                <!-- Detailed Scores Breakdown -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto relative z-10">
+                    <div class="bg-purple-50 border-2 border-purple-200 p-4 rounded-2xl text-center">
+                        <span class="text-xs text-purple-700 font-bold block">Skor Kuis TIK</span>
+                        <span id="predikat-quiz-score" class="text-3xl font-extrabold text-purple-900">0</span> Poin
+                    </div>
+                    <div class="bg-rose-50 border-2 border-rose-200 p-4 rounded-2xl text-center">
+                        <span class="text-xs text-rose-700 font-bold block">Skor Game Tangkap</span>
+                        <span id="predikat-game-score" class="text-3xl font-extrabold text-rose-900">0</span> Poin
+                    </div>
+                    <div class="bg-emerald-50 border-2 border-emerald-200 p-4 rounded-2xl text-center">
+                        <span class="text-xs text-emerald-700 font-bold block">Total Akumulasi</span>
+                        <span id="predikat-total-score" class="text-3xl font-extrabold text-emerald-900">0</span> Poin
+                    </div>
+                </div>
+
+                <!-- Description & Feedback -->
+                <div class="bg-slate-50 border-2 border-slate-200 p-4 rounded-2xl max-w-2xl mx-auto font-sans relative z-10">
+                    <p id="predikat-description" class="text-slate-700 font-semibold text-base">
+                        Siswa telah mengikuti modul pembelajaran mengenal perangkat TIK dengan penuh semangat!
+                    </p>
+                </div>
+
+                <!-- Developer & School Signature Stamp -->
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-slate-200 max-w-2xl mx-auto text-left relative z-10 font-sans">
+                    <div class="text-center sm:text-left">
+                        <p class="text-xs text-slate-400">Unit Kerja Sekolah:</p>
+                        <p class="text-sm font-bold text-slate-800">SKH Negeri 1 Kuala Kapuas</p>
+                    </div>
+                    <div class="text-center sm:text-right flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-full border-2 border-amber-400 overflow-hidden bg-teal-700 shrink-0 flex items-center justify-center shadow">
+                            <img src="assets/aku.png" alt="Ledyanto, S.Kom" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                            <i class="fa-solid fa-user text-amber-300 hidden"></i>
+                        </div>
+                        <div class="text-left sm:text-right">
+                            <p class="text-xs text-slate-400">Pengembang MPI:</p>
+                            <p class="text-sm font-bold text-teal-800">Ledyanto, S.Kom</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-wrap justify-center gap-3 pt-2 relative z-10">
+                    <button onclick="readPredikatVoice()" class="bg-amber-400 hover:bg-amber-300 text-teal-950 font-extrabold px-6 py-3 rounded-2xl text-base shadow btn-bounce flex items-center gap-2">
+                        <i class="fa-solid fa-volume-high text-xl"></i> Dengarkan Predikat 🔊
+                    </button>
+                    <button onclick="window.print()" class="bg-teal-600 hover:bg-teal-500 text-white font-extrabold px-6 py-3 rounded-2xl text-base shadow btn-bounce flex items-center gap-2">
+                        <i class="fa-solid fa-print text-xl"></i> Cetak Sertifikat
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 py-6 mt-12 border-t-4 border-teal-500">
+        <div class="max-w-6xl mx-auto px-4 text-center space-y-2">
+            <p class="text-base font-bold text-white">Media Pembelajaran Interaktif (MPI) TIK SLB</p>
+            <p class="text-sm text-slate-400">Dirancang khusus dengan prinsip aksesibilitas & inklusivitas untuk Pendidikan Khusus</p>
+            <p class="text-xs text-teal-300 font-semibold pt-2">© 2026 - Ledyanto, S.Kom | SKH Negeri 1 Kuala Kapuas</p>
+        </div>
+    </footer>
+
+    <script>
+        const hardwareList = [
+            {
+                id: 'laptop',
+                title: 'Laptop',
+                icon: 'fa-laptop',
+                image: 'assets/laptop.png',
+                color: 'bg-blue-500',
+                desc: 'Komputer lipat yang mudah dibawa ke mana-mana untuk belajar.',
+                speechText: 'Ini adalah Laptop. Komputer lipat yang mudah dibawa ke mana-mana.'
+            },
+            {
+                id: 'mouse',
+                title: 'Mouse / Tetikus',
+                icon: 'fa-computer-mouse',
+                image: 'assets/mouse.png',
+                color: 'bg-amber-500',
+                desc: 'Alat untuk menggerakkan panah penunjuk pada layar komputer.',
+                speechText: 'Ini adalah Mouse. Ditekan untuk menggerakkan petunjuk di layar.'
+            },
+            {
+                id: 'keyboard',
+                title: 'Keyboard',
+                icon: 'fa-keyboard',
+                image: 'assets/keyboard.png',
+                color: 'bg-emerald-500',
+                desc: 'Papan ketik berisikan huruf dan angka untuk mengetik kalimat.',
+                speechText: 'Ini adalah Keyboard. Papan ketik untuk menulis huruf dan angka.'
+            },
+            {
+                id: 'monitor',
+                title: 'Monitor',
+                icon: 'fa-desktop',
+                image: 'assets/monitor.png',
+                color: 'bg-purple-500',
+                desc: 'Layar mirip televisi untuk menampilkan gambar dan tulisan.',
+                speechText: 'Ini adalah Monitor. Layar untuk melihat gambar dan video.'
+            },
+            {
+                id: 'printer',
+                title: 'Printer',
+                icon: 'fa-print',
+                image: 'assets/printer.png',
+                color: 'bg-rose-500',
+                desc: 'Alat untuk mencetak tulisan atau gambar dari komputer ke kertas.',
+                speechText: 'Ini adalah Printer. Alat untuk mencetak tulisan ke atas kertas.'
+            },
+            {
+                id: 'speaker',
+                title: 'Speaker / Pengeras Suara',
+                icon: 'fa-volume-high',
+                image: 'assets/speaker.png',
+                color: 'bg-indigo-500',
+                desc: 'Alat untuk mengeluarkan suara musik atau penjelasan guru.',
+                speechText: 'Ini adalah Speaker. Digunakan untuk mendengarkan suara dan lagu.'
+            },
+            {
+                id: 'headphone',
+                title: 'Headphone',
+                icon: 'fa-headphones',
+                image: 'assets/headphone.png',
+                color: 'bg-teal-500',
+                desc: 'Alat penutup telinga untuk mendengarkan lagu secara pribadi.',
+                speechText: 'Ini adalah Headphone. Dipasang di telinga untuk mendengarkan suara.'
+            },
+            {
+                id: 'handphone',
+                title: 'Handphone / HP',
+                icon: 'fa-mobile-screen-button',
+                image: 'assets/handphone.png',
+                color: 'bg-sky-500',
+                desc: 'Telepon genggam pintar untuk belajar dan berkomunikasi.',
+                speechText: 'Ini adalah Handphone pintar. Bisa dipakai belajar dan nelpon.'
+            }
+        ];
+
+        let audioEnabled = true;
+        let isFullscreen = false;
+        let studentName = '';
+        let quizScore = 0;
+        let gameScore = 0;
+        let gameTimer = 30;
+        let gameInterval = null;
+        let gameSpawnInterval = null;
+
+        /* Quiz State & 30 Questions Dataset (3 Levels x 10 Questions) */
+        let currentQuizLevel = 1;
+        let currentQuestionIndex = 0;
+        let levelCorrectAnswers = 0;
+        let isAnswerLocked = false;
+        let currentLevelQuestions = [];
+
+        // Fungsi penjelajah/pengacak urutan array (Fisher-Yates Shuffle)
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        const quizLevelsData = {
+            1: {
+                title: "Level 1: Mengenal Gambar Alat TIK",
+                questions: [
+                    { id: 'laptop', image: 'assets/laptop.png', icon: 'fa-laptop', question: "Manakah nama perangkat TIK pada gambar di atas?", options: ["Laptop", "Printer", "Mouse", "Speaker"], correct: "Laptop", speech: "Ini adalah gambar Laptop." },
+                    { id: 'mouse', image: 'assets/mouse.png', icon: 'fa-computer-mouse', question: "Manakah nama alat TIK pada gambar di atas?", options: ["Mouse / Tetikus", "Keyboard", "Monitor", "Handphone"], correct: "Mouse / Tetikus", speech: "Ini adalah gambar Mouse atau tetikus." },
+                    { id: 'keyboard', image: 'assets/keyboard.png', icon: 'fa-keyboard', question: "Manakah nama papan ketik pada gambar di atas?", options: ["Keyboard", "Laptop", "Printer", "Headphone"], correct: "Keyboard", speech: "Ini adalah gambar Keyboard papan ketik." },
+                    { id: 'monitor', image: 'assets/monitor.png', icon: 'fa-desktop', question: "Manakah layar monitor pada gambar di atas?", options: ["Monitor", "Mouse", "Speaker", "Handphone"], correct: "Monitor", speech: "Ini adalah gambar Monitor layar komputer." },
+                    { id: 'printer', image: 'assets/printer.png', icon: 'fa-print', question: "Manakah pencetak kertas pada gambar di atas?", options: ["Printer", "Laptop", "Keyboard", "Kamera"], correct: "Printer", speech: "Ini adalah gambar Printer pencetak kertas." },
+                    { id: 'speaker', image: 'assets/speaker.png', icon: 'fa-volume-high', question: "Manakah pengeras suara pada gambar di atas?", options: ["Speaker", "Mouse", "Monitor", "Printer"], correct: "Speaker", speech: "Ini adalah gambar Speaker pengeras suara." },
+                    { id: 'headphone', image: 'assets/headphone.png', icon: 'fa-headphones', question: "Manakah penutup telinga untuk mendengar lagu di atas?", options: ["Headphone", "Laptop", "Keyboard", "Mouse"], correct: "Headphone", speech: "Ini adalah gambar Headphone." },
+                    { id: 'handphone', image: 'assets/handphone.png', icon: 'fa-mobile-screen-button', question: "Manakah telepon pintar pada gambar di atas?", options: ["Handphone / HP", "Monitor", "Printer", "Speaker"], correct: "Handphone / HP", speech: "Ini adalah gambar Handphone pintar." },
+                    { id: 'flashdisk', image: 'assets/flashdisk.png', icon: 'fa-usb', question: "Manakah alat simpan flashdisk di atas?", options: ["Flashdisk USB", "Mouse", "Laptop", "Monitor"], correct: "Flashdisk USB", speech: "Ini adalah gambar Flashdisk penyimpan data." },
+                    { id: 'camera', image: 'assets/camera.png', icon: 'fa-camera', question: "Manakah alat untuk mengambil foto di atas?", options: ["Kamera", "Printer", "Speaker", "Keyboard"], correct: "Kamera", speech: "Ini adalah gambar Kamera foto." }
+                ]
+            },
+            2: {
+                title: "Level 2: Mengenal Fungsi Alat TIK",
+                questions: [
+                    { id: 'keyboard', image: 'assets/keyboard.png', icon: 'fa-keyboard', question: "Alat untuk mengetik huruf A-Z dan angka adalah?", options: ["Keyboard", "Mouse", "Printer", "Speaker"], correct: "Keyboard", speech: "Soal: Alat untuk mengetik huruf dan angka adalah?" },
+                    { id: 'mouse', image: 'assets/mouse.png', icon: 'fa-computer-mouse', question: "Alat untuk menggerakkan panah kursor di layar adalah?", options: ["Mouse / Tetikus", "Printer", "Headphone", "Kamera"], correct: "Mouse / Tetikus", speech: "Soal: Alat untuk menggerakkan panah kursor di layar adalah?" },
+                    { id: 'printer', image: 'assets/printer.png', icon: 'fa-print', question: "Alat untuk mencetak tulisan ke atas kertas adalah?", options: ["Printer", "Monitor", "Keyboard", "Speaker"], correct: "Printer", speech: "Soal: Alat untuk mencetak tulisan ke kertas adalah?" },
+                    { id: 'monitor', image: 'assets/monitor.png', icon: 'fa-desktop', question: "Layar untuk melihat gambar dan tulisan komputer adalah?", options: ["Monitor", "Mouse", "Flashdisk", "Printer"], correct: "Monitor", speech: "Soal: Layar untuk melihat gambar komputer adalah?" },
+                    { id: 'headphone', image: 'assets/headphone.png', icon: 'fa-headphones', question: "Alat di telinga untuk mendengar musik pribadi adalah?", options: ["Headphone", "Keyboard", "Printer", "Monitor"], correct: "Headphone", speech: "Soal: Alat di telinga untuk mendengar musik adalah?" },
+                    { id: 'laptop', image: 'assets/laptop.png', icon: 'fa-laptop', question: "Komputer lipat yang mudah dibawa belajar adalah?", options: ["Laptop", "Printer", "Speaker", "Mouse"], correct: "Laptop", speech: "Soal: Komputer lipat yang mudah dibawa belajar adalah?" },
+                    { id: 'speaker', image: 'assets/speaker.png', icon: 'fa-volume-high', question: "Alat untuk mengeluarkan suara musik keras adalah?", options: ["Speaker", "Keyboard", "Flashdisk", "Mouse"], correct: "Speaker", speech: "Soal: Alat untuk mengeluarkan suara musik keras adalah?" },
+                    { id: 'handphone', image: 'assets/handphone.png', icon: 'fa-mobile-screen-button', question: "Telepon genggam pintar untuk berkomunikasi adalah?", options: ["Handphone / HP", "Printer", "Monitor", "Keyboard"], correct: "Handphone / HP", speech: "Soal: Telepon genggam pintar untuk berkomunikasi adalah?" },
+                    { id: 'flashdisk', image: 'assets/flashdisk.png', icon: 'fa-usb', question: "Benda kecil untuk menyimpan foto dan dokumen adalah?", options: ["Flashdisk USB", "Speaker", "Monitor", "Headphone"], correct: "Flashdisk USB", speech: "Soal: Benda kecil untuk menyimpan foto dan dokumen adalah?" },
+                    { id: 'camera', image: 'assets/camera.png', icon: 'fa-camera', question: "Alat khusus untuk mengambil foto kegiatan sekolah?", options: ["Kamera", "Keyboard", "Printer", "Mouse"], correct: "Kamera", speech: "Soal: Alat khusus untuk mengambil foto kegiatan sekolah?" }
+                ]
+            },
+            3: {
+                title: "Level 3: Kebiasaan Baik & Pemahaman TIK",
+                questions: [
+                    { id: 'spasi', image: 'assets/spasi.png', icon: 'fa-keyboard', question: "Tombol panjang di keyboard berguna untuk?", options: ["Memberi Spasi", "Menghapus Teks", "Mematikan HP", "Mencetak Kertas"], correct: "Memberi Spasi", speech: "Soal: Tombol panjang di keyboard berguna untuk apa?" },
+                    { id: 'cuci_tangan', image: 'assets/cuci_tangan.png', icon: 'fa-hand-sparkles', question: "Sebelum menyentuh komputer, tangan kita harus?", options: ["Bersih & Kering", "Basah terkena air", "Kotor terkena tanah", "Penuh minyak"], correct: "Bersih & Kering", speech: "Soal: Sebelum menyentuh komputer, tangan kita harus?" },
+                    { id: 'duduk', image: 'assets/duduk.png', icon: 'fa-chair', question: "Posisi duduk saat di depan komputer adalah?", options: ["Duduk Tegak & Nyaman", "Tiduran di lantai", "Membungkuk dekat", "Berdiri melompat"], correct: "Duduk Tegak & Nyaman", speech: "Soal: Posisi duduk saat belajar di depan komputer adalah?" },
+                    { id: 'matikan', image: 'assets/matikan.png', icon: 'fa-power-off', question: "Jika selesai menggunakan komputer, kita harus?", options: ["Mematikan Komputer", "Meninggalkan menyala", "Menggeprak meja", "Cabut semua kabel"], correct: "Mematikan Komputer", speech: "Soal: Jika selesai menggunakan komputer, kita harus?" },
+                    { id: 'handphone', image: 'assets/handphone.png', icon: 'fa-mobile-screen-button', question: "Alat TIK yang paling mudah dimasukkan saku celana?", options: ["Handphone / HP", "Monitor Besar", "Printer Kertas", "Keyboard Panjang"], correct: "Handphone / HP", speech: "Soal: Alat TIK mana yang mudah masuk saku celana?" },
+                    { id: 'lap', image: 'assets/lap.png', icon: 'fa-shower', question: "Jika layar monitor berdebu, dibersihkan dengan?", options: ["Lap Kain Lembut", "Disiram air keran", "Dicuci sabun", "Diampelas kasar"], correct: "Lap Kain Lembut", speech: "Soal: Jika layar monitor berdebu, dibersihkan dengan apa?" },
+                    { id: 'headphone', image: 'assets/headphone.png', icon: 'fa-headphones', question: "Mendengar suara tanpa mengganggu kawan menggunakan?", options: ["Headphone", "Speaker Keras", "Printer Kertas", "Mouse Komputer"], correct: "Headphone", speech: "Soal: Mendengar suara tanpa mengganggu kawan menggunakan apa?" },
+                    { id: 'kursor', image: 'assets/kursor.png', icon: 'fa-arrow-pointer', question: "Gambar panah bergerak di layar komputer disebut?", options: ["Kursor Panah", "Printer", "Baterai HP", "Kabel Listrik"], correct: "Kursor Panah", speech: "Soal: Gambar panah bergerak di layar komputer disebut apa?" },
+                    { id: 'cas', image: 'assets/cas.png', icon: 'fa-battery-charging', question: "Mengisi baterai laptop atau HP dinamakan?", options: ["Menghisap Daya / Cas", "Mencetak Gambar", "Mengetik Huruf", "Memutar Musik"], correct: "Menghisap Daya / Cas", speech: "Soal: Mengisi baterai laptop atau HP dinamakan apa?" },
+                    { id: 'juara', image: 'assets/juara.png', icon: 'fa-graduation-cap', question: "Siswa SLB belajar TIK agar menjadi anak yang?", options: ["Pintar & Mandiri", "Suka Marah", "Malas Belajar", "Takut Komputer"], correct: "Pintar & Mandiri", speech: "Soal: Siswa SLB belajar TIK agar menjadi anak yang?" }
+                ]
+            }
+        };
+
+        function handleQuizImgSuccess(imgEl) {
+            imgEl.classList.remove('hidden');
+            const iconEl = document.getElementById('quiz-icon');
+            if (iconEl) iconEl.classList.add('hidden');
+        }
+
+        function handleQuizImgError(imgEl) {
+            const tried = parseInt(imgEl.dataset.fallbackTried || '0', 10);
+            const id = imgEl.dataset.id;
+            const exts = ['.jpg', '.jpeg', '.svg', '.webp'];
+
+            if (id && tried < exts.length) {
+                imgEl.dataset.fallbackTried = (tried + 1).toString();
+                imgEl.src = `assets/${id}${exts[tried]}`;
+            } else {
+                imgEl.classList.add('hidden');
+                const iconEl = document.getElementById('quiz-icon');
+                if (iconEl) iconEl.classList.remove('hidden');
+            }
+        }
+
+        /* Web Audio Synthesizer Tone Generator */
+        let audioCtx = null;
+
+        function playTone(freq, type = 'sine', duration = 0.1) {
+            try {
+                if (!audioEnabled) return;
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.warn('Audio tone play failed:', e);
+            }
+        }
+
+        function playSuccessSound() {
+            try {
+                playTone(523.25, 'triangle', 0.1);
+                setTimeout(() => playTone(659.25, 'triangle', 0.1), 100);
+                setTimeout(() => playTone(783.99, 'triangle', 0.2), 200);
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        function playErrorSound() {
+            try {
+                playTone(300, 'sawtooth', 0.15);
+                setTimeout(() => playTone(220, 'sawtooth', 0.25), 150);
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        function speakText(text) {
+            if (!audioEnabled || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel(); // Stop current speech
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'id-ID';
+            utterance.rate = 0.88; // Slightly slower for SLB accessibility
+            utterance.pitch = 1.1;
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function toggleAudioNarration() {
+            audioEnabled = !audioEnabled;
+            const textEl = document.getElementById('text-audio');
+            const iconEl = document.getElementById('icon-audio');
+
+            if (audioEnabled) {
+                textEl.innerText = 'Suara: ON';
+                iconEl.className = 'fa-solid fa-volume-high text-base';
+                speakText("Suara narasi dinyalakan.");
+            } else {
+                textEl.innerText = 'Suara: OFF';
+                iconEl.className = 'fa-solid fa-volume-xmark text-base';
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function handleBgUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.body.style.backgroundImage = `url('${e.target.result}')`;
+                    playSuccessSound();
+                    speakText("Gambar latar belakang berhasil diubah!");
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function toggleFullscreen() {
+            const icon = document.getElementById('icon-fullscreen');
+            const text = document.getElementById('text-fullscreen');
+
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    isFullscreen = true;
+                    icon.className = 'fa-solid fa-compress text-base';
+                    text.innerText = 'Kecilkan';
+                }).catch(err => console.log(err));
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().then(() => {
+                        isFullscreen = false;
+                        icon.className = 'fa-solid fa-expand text-base';
+                        text.innerText = 'Layar Penuh';
+                    });
+                }
+            }
+        }
+
+        function openStudentModal() {
+            const modal = document.getElementById('student-modal');
+            const input = document.getElementById('input-student-name');
+            input.value = studentName;
+            modal.classList.remove('hidden');
+            speakText("Selamat datang di Belajar TIK Ceria. Silakan isi nama kamu.");
+        }
+
+        function startLearningWithStudent() {
+            const input = document.getElementById('input-student-name');
+            const name = input.value.trim();
+            studentName = name ? name : 'Siswa Hebat';
+
+            document.getElementById('display-student-name').innerText = studentName;
+            document.getElementById('greeting-student-title').innerText = `Halo, ${studentName}!`;
+            document.getElementById('student-modal').classList.add('hidden');
+
+            playSuccessSound();
+            speakText(`Selamat belajar ${studentName}! Pilih salah satu modul di bawah ini ya.`);
+        }
+
+        function switchTab(tabId) {
+            window.speechSynthesis.cancel();
+            
+            // Hide all views
+            const views = ['home', 'hardware', 'jodohkan', 'keyboard', 'game', 'predikat'];
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.add('hidden');
+            });
+
+            // Show selected view
+            const targetView = document.getElementById(`view-${tabId}`);
+            if (targetView) targetView.classList.remove('hidden');
+
+            // View specific initializations
+            if (tabId === 'hardware') {
+                renderHardwareCards();
+                speakText("Modul 1: Mengenal Alat TIK. Klik kartu untuk mendengar suaranya.");
+            } else if (tabId === 'jodohkan') {
+                initQuiz();
+            } else if (tabId === 'keyboard') {
+                speakText("Modul 3: Belajar Ketik Keyboard. Tekan tombol pada layar.");
+            } else if (tabId === 'game') {
+                resetGameContainer();
+                speakText("Modul 4: Mini Game Tangkap TIK. Tekan Mulai Bermain!");
+            } else if (tabId === 'predikat') {
+                updatePredikatView();
+            } else if (tabId === 'home') {
+                speakText("Menu Beranda. Pilih modul belajar TIK.");
+            }
+        }
+
+        function renderHardwareCards() {
+            const container = document.getElementById('hardware-cards-container');
+            container.innerHTML = '';
+
+            hardwareList.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl border-4 border-slate-200 p-6 shadow-md hover:shadow-xl hover:border-blue-400 transition cursor-pointer btn-bounce space-y-4";
+                card.onclick = () => {
+                    playSuccessSound();
+                    speakText(item.speechText);
+                };
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-20 h-20 rounded-2xl ${item.color} text-white flex items-center justify-center text-3xl shadow-md shrink-0 overflow-hidden relative p-1">
+                            <img src="${item.image}" alt="${item.title}" class="w-full h-full object-contain rounded-xl" 
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <i class="fa-solid ${item.icon} hidden text-4xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-extrabold text-slate-800">${item.title}</h3>
+                            <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2.5 py-0.5 rounded-full uppercase">Dengarkan Suara 🔊</span>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 font-sans text-sm leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        ${item.desc}
+                    </p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function initQuiz() {
+            selectQuizLevel(1);
+        }
+
+        function selectQuizLevel(levelNum) {
+            currentQuizLevel = levelNum;
+            currentQuestionIndex = 0;
+            levelCorrectAnswers = 0;
+            isAnswerLocked = false;
+
+            // Acak urutan 10 soal untuk level yang dipilih
+            currentLevelQuestions = shuffleArray(quizLevelsData[levelNum].questions);
+
+            // Update level tabs UI
+            for (let i = 1; i <= 3; i++) {
+                const btn = document.getElementById(`btn-level-${i}`);
+                if (btn) {
+                    if (i === levelNum) {
+                        btn.className = "level-tab-btn bg-purple-600 text-white font-bold px-4 py-2 rounded-xl shadow transition flex items-center gap-2 text-sm md:text-base";
+                    } else {
+                        btn.className = "level-tab-btn bg-white text-purple-900 hover:bg-purple-100 font-bold px-4 py-2 rounded-xl border border-purple-300 transition flex items-center gap-2 text-sm md:text-base";
+                    }
+                }
+            }
+
+            closeResultModal();
+            loadQuizQuestion();
+        }
+
+        function loadQuizQuestion() {
+            isAnswerLocked = false;
+            const feedbackEl = document.getElementById('quiz-feedback');
+            feedbackEl.className = 'hidden';
+
+            const levelData = quizLevelsData[currentQuizLevel];
+            const qData = currentLevelQuestions[currentQuestionIndex];
+
+            // Update Progress UI
+            document.getElementById('quiz-level-title').innerText = levelData.title;
+            document.getElementById('quiz-progress-text').innerText = `Soal ${currentQuestionIndex + 1} / 10`;
+
+            const pct = ((currentQuestionIndex + 1) / 10) * 100;
+            document.getElementById('quiz-progress-bar').style.width = `${pct}%`;
+
+            // Setup Question Image & Fallback Icon
+            const imgEl = document.getElementById('quiz-img');
+            const iconEl = document.getElementById('quiz-icon');
+
+            iconEl.className = `fa-solid ${qData.icon}`;
+            iconEl.classList.remove('hidden');
+
+            if (qData.image || qData.id) {
+                imgEl.dataset.fallbackTried = '0';
+                imgEl.dataset.id = qData.id || '';
+                imgEl.src = qData.image || `assets/${qData.id}.png`;
+            } else {
+                imgEl.classList.add('hidden');
+            }
+
+            // Set Question Text
+            document.getElementById('quiz-question-text').innerText = qData.question;
+
+            // Render Options
+            const optionsContainer = document.getElementById('quiz-options-container');
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...qData.options].sort(() => 0.5 - Math.random());
+
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = `bg-purple-50 border-2 border-purple-300 hover:bg-purple-600 hover:text-white text-purple-950 font-bold p-4 rounded-2xl text-lg md:text-xl transition-all shadow btn-bounce flex items-center justify-center text-center`;
+                btn.innerText = opt;
+                btn.onclick = () => checkQuizAnswer(opt, qData.correct);
+                optionsContainer.appendChild(btn);
+            });
+
+            speakText(qData.speech);
+        }
+
+        function readCurrentQuiz() {
+            const qData = currentLevelQuestions[currentQuestionIndex];
+            speakText(`${qData.speech}. Pilihlah jawaban yang tepat.`);
+        }
+
+        function checkQuizAnswer(selected, correct) {
+            if (isAnswerLocked) return;
+            isAnswerLocked = true;
+
+            const feedbackEl = document.getElementById('quiz-feedback');
+            feedbackEl.classList.remove('hidden');
+
+            if (selected === correct) {
+                levelCorrectAnswers++;
+                quizScore += 10;
+                document.getElementById('quiz-score').innerText = quizScore;
+                playSuccessSound();
+
+                feedbackEl.className = 'bg-emerald-100 text-emerald-900 border-2 border-emerald-400 p-4 rounded-2xl font-bold text-lg block';
+                feedbackEl.innerHTML = `<i class="fa-solid fa-circle-check text-2xl text-emerald-600 mr-2"></i> HEBAT ${studentName ? studentName.toUpperCase() : ''}! Jawaban Kamu Benar 🎉`;
+                speakText(`Hebat ${studentName}! Jawaban kamu benar.`);
+            } else {
+                playErrorSound();
+                feedbackEl.className = 'bg-rose-100 text-rose-900 border-2 border-rose-400 p-4 rounded-2xl font-bold text-lg block';
+                feedbackEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-2xl text-rose-600 mr-2"></i> Jawaban Kurang Tepat! Yang Benar: ${correct}`;
+                speakText(`Jawaban belum tepat. Yang benar adalah ${correct}.`);
+            }
+
+            // Next question or show end-level modal
+            setTimeout(() => {
+                if (currentQuestionIndex < 9) {
+                    currentQuestionIndex++;
+                    loadQuizQuestion();
+                } else {
+                    showLevelResultModal();
+                }
+            }, 1800);
+        }
+
+        function showLevelResultModal() {
+            const modal = document.getElementById('quiz-result-modal');
+            const scoreVal = levelCorrectAnswers * 10;
+            const currentStudentStr = studentName ? studentName : "Siswa SKH Negeri 1";
+
+            document.getElementById('result-level-badge').innerText = `SELESAI ${quizLevelsData[currentQuizLevel].title.toUpperCase()}`;
+            document.getElementById('result-student-name').innerText = currentStudentStr;
+            document.getElementById('result-score-val').innerText = scoreVal;
+
+            let predicateText = "CUKUP (TETAP SEMANGAT) ⭐";
+            let descText = `Bagus ${currentStudentStr}! Kamu sudah menyelesaikan 10 soal. Ayo terus banyak berlatih!`;
+            let starsHtml = `<i class="fa-solid fa-star text-amber-400"></i><i class="fa-regular fa-star text-slate-300"></i><i class="fa-regular fa-star text-slate-300"></i>`;
+            let iconClass = "fa-solid fa-medal text-yellow-500";
+
+            if (scoreVal === 100) {
+                predicateText = "ISTIMEWA (MAHA BINTANG) 🏆";
+                descText = `LUAR BIASA PERFECT ${currentStudentStr}! Kamu menjawab semua 10 soal dengan benar! Sangat mengagumkan!`;
+                starsHtml = `<i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i>`;
+                iconClass = "fa-solid fa-crown text-yellow-500";
+            } else if (scoreVal >= 80) {
+                predicateText = "SANGAT BAIK (JUARA TIK) 🥇";
+                descText = `SANGAT HEBAT ${currentStudentStr}! Kamu meraih nilai ${scoreVal}. Kamu sudah sangat paham materi TIK ini!`;
+                starsHtml = `<i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i>`;
+                iconClass = "fa-solid fa-trophy text-yellow-500";
+            } else if (scoreVal >= 60) {
+                predicateText = "BAIK (BINTANG CERIA) ⭐⭐";
+                descText = `BAGUS ${currentStudentStr}! Nilaimu ${scoreVal}. Sedikit lagi berlatih kamu pasti bisa dapat nilai 100!`;
+                starsHtml = `<i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i><i class="fa-regular fa-star text-slate-300"></i>`;
+                iconClass = "fa-solid fa-award text-yellow-500";
+            }
+
+            document.getElementById('result-predicate-badge').innerText = `PREDIKAT: ${predicateText}`;
+            document.getElementById('result-description').innerText = descText;
+            document.getElementById('result-stars-container').innerHTML = starsHtml;
+            document.getElementById('result-icon').className = iconClass;
+
+            const nextBtn = document.getElementById('btn-next-level');
+            if (currentQuizLevel < 3) {
+                nextBtn.innerHTML = `<i class="fa-solid fa-circle-arrow-right"></i> Lanjut Ke Level ${currentQuizLevel + 1}`;
+            } else {
+                nextBtn.innerHTML = `<i class="fa-solid fa-trophy"></i> Lihat Sertifikat Predikat`;
+            }
+
+            modal.classList.remove('hidden');
+            playSuccessSound();
+            speakText(`Selamat ${currentStudentStr}! Kamu telah menyelesaikan Level ${currentQuizLevel} dengan nilai ${scoreVal}. Predikat kamu adalah ${predicateText}.`);
+        }
+
+        function readQuizResultVoice() {
+            const currentStudentStr = studentName ? studentName : "Siswa SKH Negeri 1";
+            const descText = document.getElementById('result-description').innerText;
+            const predBadge = document.getElementById('result-predicate-badge').innerText;
+            speakText(`Hasil Kuis untuk ${currentStudentStr}. ${predBadge}. ${descText}`);
+        }
+
+        function nextQuizLevelOrRepeat() {
+            closeResultModal();
+            if (currentQuizLevel < 3) {
+                selectQuizLevel(currentQuizLevel + 1);
+            } else {
+                switchTab('predikat');
+            }
+        }
+
+        function closeResultModal() {
+            const modal = document.getElementById('quiz-result-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function typeChar(char) {
+            const display = document.getElementById('typing-display');
+            if (display.querySelector('span')) {
+                display.innerText = '';
+            }
+            display.innerText += char;
+            playTone(700, 'sine', 0.08);
+
+            let speechVal = char;
+            if (char === ' ') speechVal = 'Spasi';
+            speakText(speechVal);
+        }
+
+        function backspaceDisplay() {
+            const display = document.getElementById('typing-display');
+            if (display.querySelector('span')) return;
+            
+            display.innerText = display.innerText.slice(0, -1);
+            if (display.innerText.length === 0) {
+                display.innerHTML = `<span class="text-slate-400 font-sans text-lg font-normal">Tekan tombol huruf / angka di bawah...</span>`;
+            }
+            playTone(350, 'sawtooth', 0.1);
+            speakText("Hapus");
+        }
+
+        function clearTypingDisplay() {
+            const display = document.getElementById('typing-display');
+            display.innerHTML = `<span class="text-slate-400 font-sans text-lg font-normal">Tekan tombol huruf / angka di bawah...</span>`;
+            speakText("Hapus semua");
+        }
+
+        // Hardware keyboard physical typing listener
+        window.addEventListener('keydown', (e) => {
+            const viewKey = document.getElementById('view-keyboard');
+            if (viewKey && !viewKey.classList.contains('hidden')) {
+                if (e.key.length === 1) {
+                    typeChar(e.key.toUpperCase());
+                } else if (e.key === 'Backspace') {
+                    backspaceDisplay();
+                } else if (e.key === ' ') {
+                    typeChar(' ');
+                }
+            }
+        });
+
+        function resetGameContainer() {
+            clearInterval(gameInterval);
+            clearInterval(gameSpawnInterval);
+            gameScore = 0;
+            gameTimer = 30;
+            document.getElementById('game-score').innerText = gameScore;
+            document.getElementById('game-timer').innerText = gameTimer;
+            
+            const arena = document.getElementById('game-arena');
+            arena.innerHTML = `
+                <div id="game-welcome-text" class="text-center p-6 space-y-2">
+                    <i class="fa-solid fa-hand-pointer text-6xl text-rose-400 animate-bounce"></i>
+                    <h3 class="text-2xl font-bold text-slate-700">Siap untuk Tangkap Gambar TIK?</h3>
+                    <p class="text-slate-500 max-w-md mx-auto">Tekan "Mulai Bermain", lalu klik gambar TIK yang muncul di layar untuk mengumpulkan poin!</p>
+                </div>
+            `;
+            document.getElementById('btn-start-game').disabled = false;
+        }
+
+        function startGame() {
+            resetGameContainer();
+            document.getElementById('btn-start-game').disabled = true;
+            speakText("Game dimulai! Tangkap gambar TIK sebanyak-banyaknya!");
+
+            gameInterval = setInterval(() => {
+                gameTimer--;
+                document.getElementById('game-timer').innerText = gameTimer;
+                if (gameTimer <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            gameSpawnInterval = setInterval(spawnGameTarget, 900);
+        }
+
+        function spawnGameTarget() {
+            const arena = document.getElementById('game-arena');
+            const welcomeText = document.getElementById('game-welcome-text');
+            if (welcomeText) welcomeText.remove();
+
+            const item = hardwareList[Math.floor(Math.random() * hardwareList.length)];
+            
+            const targetBtn = document.createElement('button');
+            targetBtn.className = `absolute ${item.color} text-white w-16 h-16 sm:w-20 sm:h-20 rounded-3xl shadow-xl flex items-center justify-center text-3xl sm:text-4xl btn-bounce transition-all cursor-pointer pulse-slow`;
+            
+            const maxX = Math.max(10, arena.clientWidth - 90);
+            const maxY = Math.max(10, arena.clientHeight - 90);
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
+
+            targetBtn.style.left = `${randomX}px`;
+            targetBtn.style.top = `${randomY}px`;
+            targetBtn.innerHTML = `<i class="fa-solid ${item.icon}"></i>`;
+
+            targetBtn.onclick = () => {
+                gameScore += 10;
+                document.getElementById('game-score').innerText = gameScore;
+                playSuccessSound();
+                speakText(item.title);
+                targetBtn.remove();
+            };
+
+            arena.appendChild(targetBtn);
+
+            setTimeout(() => {
+                if (targetBtn && targetBtn.parentNode) {
+                    targetBtn.remove();
+                }
+            }, 1800);
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            clearInterval(gameSpawnInterval);
+            document.getElementById('btn-start-game').disabled = false;
+
+            const arena = document.getElementById('game-arena');
+            arena.innerHTML = `
+                <div class="text-center p-6 space-y-4 bg-white/90 backdrop-blur-md rounded-3xl border-4 border-yellow-400 shadow-2xl max-w-md">
+                    <div class="text-5xl text-yellow-500">
+                        <i class="fa-solid fa-trophy animate-bounce"></i>
+                    </div>
+                    <h3 class="text-3xl font-extrabold text-slate-800">LUAR BIASA ${studentName.toUpperCase()}!</h3>
+                    <p class="text-xl font-bold text-rose-600">Skor Akhir Kamu: <span class="text-3xl font-black">${gameScore}</span> Poin</p>
+                    <p class="text-sm text-slate-600">Kamu hebat sekali dalam mengenali perangkat TIK!</p>
+                    <button onclick="startGame()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-6 py-2.5 rounded-2xl text-lg shadow-md btn-bounce">
+                        Main Lagi <i class="fa-solid fa-rotate-right ml-1"></i>
+                    </button>
+                </div>
+            `;
+            
+            playSuccessSound();
+            speakText(`Selesai! Skor akhir ${studentName} adalah ${gameScore} poin. Kamu luar biasa!`);
+        }
+
+        function updatePredikatView() {
+            const currentName = studentName ? studentName : "Siswa SKH Negeri 1";
+            document.getElementById('predikat-student-name').innerText = currentName;
+            document.getElementById('predikat-quiz-score').innerText = quizScore;
+            document.getElementById('predikat-game-score').innerText = gameScore;
+
+            const totalScore = quizScore + gameScore;
+            document.getElementById('predikat-total-score').innerText = totalScore;
+
+            let badgeTitle = "Bintang TIK Ceria ⭐";
+            let desc = `Ananda ${currentName} telah mengikuti seluruh modul pembelajaran TIK dengan penuh antusias dan semangat belajar yang tinggi.`;
+
+            if (totalScore >= 300) {
+                badgeTitle = "Maha Bintang TIK SKH 1 🏆";
+                desc = `Luar biasa sempurna! Ananda ${currentName} sangat mahir menguasai perangkat komputer, menyelesaikan semua soal kuis, dan meraih skor tertinggi!`;
+            } else if (totalScore >= 150) {
+                badgeTitle = "Juara Komputer Hebat 🥇";
+                desc = `Sangat hebat! Ananda ${currentName} berhasil mengenali perangkat TIK dengan sangat baik dan tangkas dalam latihan keyboard serta kuis!`;
+            } else if (totalScore >= 50) {
+                badgeTitle = "Siswa TIK Mandiri 🏅";
+                desc = `Bagus sekali! Ananda ${currentName} sudah menunjukkan pemahaman yang baik dalam mengenal peralatan TIK di sekolah.`;
+            }
+
+            document.getElementById('predikat-badge-title').innerHTML = `<i class="fa-solid fa-crown text-yellow-500"></i> ${badgeTitle}`;
+            document.getElementById('predikat-description').innerText = desc;
+
+            speakText(`Predikat Capaian Belajar untuk ${currentName}. ${badgeTitle}. ${desc}`);
+        }
+
+        function readPredikatVoice() {
+            const currentName = studentName ? studentName : "Siswa SKH Negeri 1";
+            const desc = document.getElementById('predikat-description').innerText;
+            speakText(`Sertifikat Capaian TIK untuk ${currentName}. ${desc}`);
+        }
+
+        /* On Window Load Handler */
+        window.onload = function() {
+            console.log("MPI TIK SLB SKH Negeri 1 Kuala Kapuas initialized successfully.");
+            openStudentModal();
+        };
+    </script>
+</body>
+</html>
